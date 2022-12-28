@@ -1,23 +1,22 @@
-import { useRecoilValue, useSetRecoilState, useResetRecoilState } from 'recoil'
-import { countState, incrementCount, decrementCount } from '../lib/recoil-atoms'
-
-const useCounter = () => ({
-  count: useRecoilValue(countState),
-  increment: useSetRecoilState(incrementCount),
-  decrement: useSetRecoilState(decrementCount),
-  reset: useResetRecoilState(countState),
-})
+import { useState, useCallback } from 'react'
+import { useRecoilCallback } from 'recoil'
 
 const Counter = () => {
-  const { count, increment, decrement, reset } = useCounter()
+  const [error, setError] = useState()
+  const doSomething = useRecoilCallback(() => async () => {
+    throw new Error("Something went wrong.");
+  }, []);
+  const handleDoSomething = useCallback(async ()=>{
+    try {
+    await doSomething();
+    } catch (e) {
+      setError(e.message)
+    }
+  },[ setError])
   return (
     <div>
-      <h1>
-        Count: <span>{count}</span>
-      </h1>
-      <button onClick={increment}>+1</button>
-      <button onClick={decrement}>-1</button>
-      <button onClick={reset}>Reset</button>
+      <button onClick={handleDoSomething}>Do something</button>
+      {error && <p>Error: {error}</p>}
     </div>
   )
 }
